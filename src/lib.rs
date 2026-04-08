@@ -8,7 +8,7 @@ use bitcoin::Network;
 /// public interface to the service, and it should be used to interact with it.
 pub struct Florestad {
     rt: tokio::runtime::Runtime,
-    florestad: florestad::Florestad,
+    florestad: floresta_node::Florestad,
 }
 
 impl Florestad {
@@ -24,7 +24,9 @@ impl Florestad {
             .build()
             .unwrap();
 
-        let florestad = florestad::Florestad::default();
+        let data_dir = String::from("/data/data/com.github.jvsena42.mandacaru/files");
+        let florestad =
+            floresta_node::Florestad::new(bitcoin::Network::Bitcoin, data_dir);
         Self { rt: _rt, florestad }
     }
     
@@ -40,7 +42,7 @@ impl Florestad {
             .build()
             .unwrap();
 
-        let florestad = florestad::Florestad::from_config(config.into());
+        let florestad = floresta_node::Florestad::from_config(config.into());
         Self { rt: _rt, florestad }
     }
     
@@ -67,7 +69,7 @@ impl Florestad {
     /// running on the background and do all the heavy lifting for you.
     pub fn start(&self) {
         self.rt.block_on(async {
-            self.florestad.start().await;
+            self.florestad.start().await.expect("Failed to start florestad");
         });
     }
 }
@@ -101,20 +103,21 @@ pub struct Config {
     pub wallet_descriptor: Option<String>,
 }
 
-impl From<Config> for florestad::Config {
-    fn from(config: Config) -> florestad::Config {
-        Self {
-            data_dir: config.data_dir,
-            electrum_address: config.electrum_address,
-            json_rpc_address: config.rpc_address,
-            filters_start_height: config.filters_start_height,
-            log_to_file: true,
-            log_to_stdout: false,
-            assume_utreexo: false,
-            network: config.network.into(),
-            wallet_descriptor: config.wallet_descriptor.map(|desc| vec![desc]),
-            cfilters: true,
-            ..Default::default()
-        }
+impl From<Config> for floresta_node::Config {
+    fn from(config: Config) -> floresta_node::Config {
+        let data_dir = config
+            .data_dir
+            .unwrap_or_else(|| String::from("/data/data/com.github.jvsena42.mandacaru/files"));
+
+        let mut node_config = floresta_node::Config::new(config.network, data_dir);
+        node_config.electrum_address = config.electrum_address;
+        node_config.json_rpc_address = config.rpc_address;
+        node_config.filters_start_height = config.filters_start_height;
+        node_config.log_to_file = true;
+        node_config.log_to_stdout = false;
+        node_config.assume_utreexo = false;
+        node_config.wallet_descriptor = config.wallet_descriptor.map(|desc| vec![desc]);
+        node_config.cfilters = true;
+        node_config
     }
 }
