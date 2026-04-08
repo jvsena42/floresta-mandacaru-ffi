@@ -9,6 +9,7 @@ use bitcoin::Network;
 pub struct Florestad {
     rt: tokio::runtime::Runtime,
     florestad: floresta_node::Florestad,
+    _log_guard: Option<floresta_node::WorkerGuard>,
 }
 
 impl Florestad {
@@ -25,9 +26,12 @@ impl Florestad {
             .unwrap();
 
         let data_dir = String::from("/data/data/com.github.jvsena42.mandacaru/files");
+        let log_guard = floresta_node::init_logging(&data_dir, true, false, false)
+            .ok()
+            .flatten();
         let florestad =
             floresta_node::Florestad::new(bitcoin::Network::Bitcoin, data_dir);
-        Self { rt: _rt, florestad }
+        Self { rt: _rt, florestad, _log_guard: log_guard }
     }
     
     /// Create a new instance of florestad from a configuration
@@ -42,8 +46,17 @@ impl Florestad {
             .build()
             .unwrap();
 
-        let florestad = floresta_node::Florestad::from_config(config.into());
-        Self { rt: _rt, florestad }
+        let node_config: floresta_node::Config = config.into();
+        let log_guard = floresta_node::init_logging(
+            &node_config.data_dir,
+            node_config.log_to_file,
+            node_config.log_to_stdout,
+            node_config.debug,
+        )
+        .ok()
+        .flatten();
+        let florestad = floresta_node::Florestad::from_config(node_config);
+        Self { rt: _rt, florestad, _log_guard: log_guard }
     }
     
     /// Gracefully stop the service
