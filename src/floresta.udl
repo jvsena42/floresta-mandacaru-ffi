@@ -15,6 +15,7 @@ dictionary Config {
     string? wallet_descriptor = null;
     
     i32? filters_start_height = null;
+    boolean assume_utreexo = false;
 };
 
 interface Florestad {
