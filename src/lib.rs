@@ -114,6 +114,9 @@ pub struct Config {
 
     /// The wallet descriptor to keep track of funds for
     pub wallet_descriptor: Option<String>,
+
+    /// Whether we should use assume utreexo
+    pub assume_utreexo: bool,
 }
 
 impl From<Config> for floresta_node::Config {
@@ -128,7 +131,7 @@ impl From<Config> for floresta_node::Config {
         node_config.filters_start_height = config.filters_start_height;
         node_config.log_to_file = true;
         node_config.log_to_stdout = false;
-        node_config.assume_utreexo = false;
+        node_config.assume_utreexo = config.assume_utreexo;
         node_config.wallet_descriptor = config.wallet_descriptor.map(|desc| vec![desc]);
         node_config.cfilters = true;
         node_config
