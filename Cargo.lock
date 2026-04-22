@@ -778,7 +778,7 @@ checksum = "0399f9d26e5191ce32c498bebd31e7a3ceabc2745f0ac54af3f335126c3f24b3"
 [[package]]
 name = "floresta-chain"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#4d91730dd77127d10fffe9db446df894e59343fb"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#5b9120df30ec9342d9acc44f549590c8c8f974c2"
 dependencies = [
  "bitcoin",
  "floresta-common",
@@ -794,7 +794,7 @@ dependencies = [
 [[package]]
 name = "floresta-common"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#4d91730dd77127d10fffe9db446df894e59343fb"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#5b9120df30ec9342d9acc44f549590c8c8f974c2"
 dependencies = [
  "bitcoin",
  "hashbrown",
@@ -806,7 +806,7 @@ dependencies = [
 [[package]]
 name = "floresta-compact-filters"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#4d91730dd77127d10fffe9db446df894e59343fb"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#5b9120df30ec9342d9acc44f549590c8c8f974c2"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -815,7 +815,7 @@ dependencies = [
 [[package]]
 name = "floresta-electrum"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#4d91730dd77127d10fffe9db446df894e59343fb"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#5b9120df30ec9342d9acc44f549590c8c8f974c2"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -847,7 +847,7 @@ dependencies = [
 [[package]]
 name = "floresta-mempool"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#4d91730dd77127d10fffe9db446df894e59343fb"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#5b9120df30ec9342d9acc44f549590c8c8f974c2"
 dependencies = [
  "ahash",
  "bitcoin",
@@ -860,7 +860,7 @@ dependencies = [
 [[package]]
 name = "floresta-node"
 version = "0.9.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#4d91730dd77127d10fffe9db446df894e59343fb"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#5b9120df30ec9342d9acc44f549590c8c8f974c2"
 dependencies = [
  "axum",
  "bitcoin",
@@ -891,7 +891,7 @@ dependencies = [
 [[package]]
 name = "floresta-watch-only"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#4d91730dd77127d10fffe9db446df894e59343fb"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#5b9120df30ec9342d9acc44f549590c8c8f974c2"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -905,7 +905,7 @@ dependencies = [
 [[package]]
 name = "floresta-wire"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#4d91730dd77127d10fffe9db446df894e59343fb"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Freduce-chainstore-allocation#5b9120df30ec9342d9acc44f549590c8c8f974c2"
 dependencies = [
  "bip324",
  "bitcoin",
