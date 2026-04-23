@@ -778,7 +778,7 @@ checksum = "0399f9d26e5191ce32c498bebd31e7a3ceabc2745f0ac54af3f335126c3f24b3"
 [[package]]
 name = "floresta-chain"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8c813d3c95ddb6512c6e6dad6bb663b770049ffa"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Floaddescriptor-cache-all-paths#ef4b1d650a2fdc94be61fd9d68f22c5ad44505f0"
 dependencies = [
  "bitcoin",
  "floresta-common",
@@ -794,7 +794,7 @@ dependencies = [
 [[package]]
 name = "floresta-common"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8c813d3c95ddb6512c6e6dad6bb663b770049ffa"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Floaddescriptor-cache-all-paths#ef4b1d650a2fdc94be61fd9d68f22c5ad44505f0"
 dependencies = [
  "bitcoin",
  "hashbrown",
@@ -806,7 +806,7 @@ dependencies = [
 [[package]]
 name = "floresta-compact-filters"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8c813d3c95ddb6512c6e6dad6bb663b770049ffa"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Floaddescriptor-cache-all-paths#ef4b1d650a2fdc94be61fd9d68f22c5ad44505f0"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -815,7 +815,7 @@ dependencies = [
 [[package]]
 name = "floresta-electrum"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8c813d3c95ddb6512c6e6dad6bb663b770049ffa"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Floaddescriptor-cache-all-paths#ef4b1d650a2fdc94be61fd9d68f22c5ad44505f0"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -847,7 +847,7 @@ dependencies = [
 [[package]]
 name = "floresta-mempool"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8c813d3c95ddb6512c6e6dad6bb663b770049ffa"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Floaddescriptor-cache-all-paths#ef4b1d650a2fdc94be61fd9d68f22c5ad44505f0"
 dependencies = [
  "ahash",
  "bitcoin",
@@ -860,7 +860,7 @@ dependencies = [
 [[package]]
 name = "floresta-node"
 version = "0.9.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8c813d3c95ddb6512c6e6dad6bb663b770049ffa"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Floaddescriptor-cache-all-paths#ef4b1d650a2fdc94be61fd9d68f22c5ad44505f0"
 dependencies = [
  "axum",
  "bitcoin",
@@ -891,7 +891,7 @@ dependencies = [
 [[package]]
 name = "floresta-watch-only"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8c813d3c95ddb6512c6e6dad6bb663b770049ffa"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Floaddescriptor-cache-all-paths#ef4b1d650a2fdc94be61fd9d68f22c5ad44505f0"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -905,7 +905,7 @@ dependencies = [
 [[package]]
 name = "floresta-wire"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8c813d3c95ddb6512c6e6dad6bb663b770049ffa"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Floaddescriptor-cache-all-paths#ef4b1d650a2fdc94be61fd9d68f22c5ad44505f0"
 dependencies = [
  "bip324",
  "bitcoin",
