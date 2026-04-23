@@ -778,13 +778,15 @@ checksum = "0399f9d26e5191ce32c498bebd31e7a3ceabc2745f0ac54af3f335126c3f24b3"
 [[package]]
 name = "floresta-chain"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#098ae7d19ad93160ee6638a7ed5a21c968294af6"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=feat%2Futreexo-snapshot-dump-load#eebce74422e7eddee1ac451c009567f0663d92f6"
 dependencies = [
  "bitcoin",
  "floresta-common",
  "lru",
  "memmap2",
  "rustreexo",
+ "serde",
+ "serde_json",
  "sha2",
  "spin",
  "tracing",
@@ -794,7 +796,7 @@ dependencies = [
 [[package]]
 name = "floresta-common"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#098ae7d19ad93160ee6638a7ed5a21c968294af6"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=feat%2Futreexo-snapshot-dump-load#eebce74422e7eddee1ac451c009567f0663d92f6"
 dependencies = [
  "bitcoin",
  "hashbrown",
@@ -806,7 +808,7 @@ dependencies = [
 [[package]]
 name = "floresta-compact-filters"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#098ae7d19ad93160ee6638a7ed5a21c968294af6"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=feat%2Futreexo-snapshot-dump-load#eebce74422e7eddee1ac451c009567f0663d92f6"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -815,7 +817,7 @@ dependencies = [
 [[package]]
 name = "floresta-electrum"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#098ae7d19ad93160ee6638a7ed5a21c968294af6"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=feat%2Futreexo-snapshot-dump-load#eebce74422e7eddee1ac451c009567f0663d92f6"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -841,13 +843,14 @@ dependencies = [
  "rustls",
  "rustreexo",
  "tokio",
+ "tracing",
  "uniffi",
 ]
 
 [[package]]
 name = "floresta-mempool"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#098ae7d19ad93160ee6638a7ed5a21c968294af6"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=feat%2Futreexo-snapshot-dump-load#eebce74422e7eddee1ac451c009567f0663d92f6"
 dependencies = [
  "ahash",
  "bitcoin",
@@ -860,7 +863,7 @@ dependencies = [
 [[package]]
 name = "floresta-node"
 version = "0.9.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#098ae7d19ad93160ee6638a7ed5a21c968294af6"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=feat%2Futreexo-snapshot-dump-load#eebce74422e7eddee1ac451c009567f0663d92f6"
 dependencies = [
  "axum",
  "bitcoin",
@@ -891,7 +894,7 @@ dependencies = [
 [[package]]
 name = "floresta-watch-only"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#098ae7d19ad93160ee6638a7ed5a21c968294af6"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=feat%2Futreexo-snapshot-dump-load#eebce74422e7eddee1ac451c009567f0663d92f6"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -905,7 +908,7 @@ dependencies = [
 [[package]]
 name = "floresta-wire"
 version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#098ae7d19ad93160ee6638a7ed5a21c968294af6"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=feat%2Futreexo-snapshot-dump-load#eebce74422e7eddee1ac451c009567f0663d92f6"
 dependencies = [
  "bip324",
  "bitcoin",
@@ -2335,6 +2338,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "63e71662fa4b2a2c3a26f570f037eb95bb1f85397f3cd8076caed2f026a6d100"
 dependencies = [
  "pin-project-lite",
+ "tracing-attributes",
  "tracing-core",
 ]
 
@@ -2348,6 +2352,17 @@ dependencies = [
  "thiserror 2.0.18",
  "time",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "tracing-attributes"
+version = "0.1.31"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7490cfa5ec963746568740651ac6781f701c9c5ea257c58e057f3ba8cf69e8da"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

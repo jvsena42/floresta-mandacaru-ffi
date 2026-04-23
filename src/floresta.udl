@@ -6,6 +6,22 @@ enum Network {
     "Testnet4"
 };
 
+[Error]
+enum UtreexoExportError {
+    "NotStarted",
+    "NotSynced",
+    "Internal"
+};
+
+[Error]
+enum UtreexoImportError {
+    "InvalidJson",
+    "UnsupportedVersion",
+    "UnknownNetwork",
+    "InvalidHex",
+    "NetworkMismatch"
+};
+
 dictionary Config {
     string? data_dir = null;
     string? electrum_address = null;
@@ -13,20 +29,40 @@ dictionary Config {
     Network network = "Bitcoin";
     string? wallet_xpub = null;
     string? wallet_descriptor = null;
-    
+
     i32? filters_start_height = null;
     boolean assume_utreexo = false;
+
+    // JSON payload produced by `Florestad.dump_utreexo_state()` on a synced
+    // node. When present, the daemon uses it instead of the hardcoded
+    // assume-utreexo checkpoint, skipping IBD from the snapshot's height.
+    // Validated and applied at daemon construction; invalid JSON causes
+    // the `from_config` constructor to panic (matches existing unwrap
+    // pattern — callers should pre-validate with
+    // `validate_utreexo_snapshot_json`).
+    string? user_utreexo_snapshot_json = null;
 };
 
 interface Florestad {
     constructor();
-    
+
     [Name=from_config]
     constructor(Config conf);
-    
+
     void start();
     void stop();
+
+    // Export the current Utreexo accumulator as a JSON string suitable for
+    // transfer to another device (clipboard, QR, share sheet). Returns an
+    // error if the node has not started or is still in IBD.
+    [Throws=UtreexoExportError]
+    string dump_utreexo_state();
 };
 
 namespace floresta {
+    // Verify that a payload (produced by `dump_utreexo_state`) parses
+    // cleanly and matches the expected network. Use this before triggering
+    // a daemon restart with the payload plugged into `Config`.
+    [Throws=UtreexoImportError]
+    void validate_utreexo_snapshot_json(string payload, Network expected_network);
 };
