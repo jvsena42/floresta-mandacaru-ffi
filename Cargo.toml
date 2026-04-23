@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 uniffi = { version = "0.26.1", features = ["build", "cli"] }
-floresta-node = { git = "https://github.com/jvsena42/Floresta-mandacaru", branch = "fix/loaddescriptor-cache-all-paths", features = ["json-rpc", "compact-filters"] }
+floresta-node = { git = "https://github.com/jvsena42/Floresta-mandacaru", branch = "master", features = ["json-rpc", "compact-filters"] }
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
 bitcoin = "0.32"
 rustreexo = "0.5"
