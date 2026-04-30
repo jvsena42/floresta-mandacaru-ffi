@@ -777,8 +777,8 @@ checksum = "0399f9d26e5191ce32c498bebd31e7a3ceabc2745f0ac54af3f335126c3f24b3"
 
 [[package]]
 name = "floresta-chain"
-version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#0947557178171f96b1d35ac04442d352c8c5ded2"
+version = "0.5.1"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8563cb4a264185b8d6177517cc75bfda15bd8db5"
 dependencies = [
  "bitcoin",
  "floresta-common",
@@ -795,8 +795,8 @@ dependencies = [
 
 [[package]]
 name = "floresta-common"
-version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#0947557178171f96b1d35ac04442d352c8c5ded2"
+version = "0.5.1"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8563cb4a264185b8d6177517cc75bfda15bd8db5"
 dependencies = [
  "bitcoin",
  "hashbrown",
@@ -807,8 +807,8 @@ dependencies = [
 
 [[package]]
 name = "floresta-compact-filters"
-version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#0947557178171f96b1d35ac04442d352c8c5ded2"
+version = "0.5.1"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8563cb4a264185b8d6177517cc75bfda15bd8db5"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -816,8 +816,8 @@ dependencies = [
 
 [[package]]
 name = "floresta-electrum"
-version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#0947557178171f96b1d35ac04442d352c8c5ded2"
+version = "0.5.1"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8563cb4a264185b8d6177517cc75bfda15bd8db5"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -849,8 +849,8 @@ dependencies = [
 
 [[package]]
 name = "floresta-mempool"
-version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#0947557178171f96b1d35ac04442d352c8c5ded2"
+version = "0.5.1"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8563cb4a264185b8d6177517cc75bfda15bd8db5"
 dependencies = [
  "ahash",
  "bitcoin",
@@ -862,8 +862,8 @@ dependencies = [
 
 [[package]]
 name = "floresta-node"
-version = "0.9.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#0947557178171f96b1d35ac04442d352c8c5ded2"
+version = "0.9.1"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8563cb4a264185b8d6177517cc75bfda15bd8db5"
 dependencies = [
  "axum",
  "bitcoin",
@@ -893,8 +893,8 @@ dependencies = [
 
 [[package]]
 name = "floresta-watch-only"
-version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#0947557178171f96b1d35ac04442d352c8c5ded2"
+version = "0.5.1"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8563cb4a264185b8d6177517cc75bfda15bd8db5"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -907,8 +907,8 @@ dependencies = [
 
 [[package]]
 name = "floresta-wire"
-version = "0.5.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#0947557178171f96b1d35ac04442d352c8c5ded2"
+version = "0.5.1"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#8563cb4a264185b8d6177517cc75bfda15bd8db5"
 dependencies = [
  "bip324",
  "bitcoin",
