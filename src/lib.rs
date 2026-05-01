@@ -178,6 +178,10 @@ pub struct Config {
     /// payload will panic (callers should pre-check with
     /// [`validate_utreexo_snapshot_json`]).
     pub user_utreexo_snapshot_json: Option<String>,
+
+    /// User-agent advertised in the P2P version handshake. When `None` or
+    /// empty, falls back to `floresta_node::Config`'s default empty string.
+    pub user_agent: Option<String>,
 }
 
 impl From<Config> for floresta_node::Config {
@@ -195,6 +199,10 @@ impl From<Config> for floresta_node::Config {
         node_config.assume_utreexo = config.assume_utreexo;
         node_config.wallet_descriptor = config.wallet_descriptor.map(|desc| vec![desc]);
         node_config.cfilters = true;
+
+        if let Some(ua) = config.user_agent.filter(|s| !s.is_empty()) {
+            node_config.user_agent = ua;
+        }
 
         if let Some(payload) = config.user_utreexo_snapshot_json {
             let snap = floresta_node::UtreexoSnapshot::from_json(&payload)

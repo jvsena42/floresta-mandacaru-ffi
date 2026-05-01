@@ -33,6 +33,10 @@ dictionary Config {
     i32? filters_start_height = null;
     boolean assume_utreexo = false;
 
+    // User-agent advertised in the P2P version handshake. When None or empty
+    // the daemon falls back to floresta-node's default (empty string).
+    string? user_agent = null;
+
     // JSON payload produced by `Florestad.dump_utreexo_state()` on a synced
     // node. When present, the daemon uses it instead of the hardcoded
     // assume-utreexo checkpoint, skipping IBD from the snapshot's height.
