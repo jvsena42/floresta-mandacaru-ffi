@@ -1,0 +1,6 @@
+# Force 16 KB-aligned LOAD segments for the Android ARM64 cdylib so the
+# resulting .so loads on Android 15+ devices using 16 KB memory pages.
+# Google Play requires this for apps targeting Android 15+ from 2025-11-01.
+# See https://developer.android.com/16kb-page-size
+[target.aarch64-linux-android]
+rustflags = ["-C", "link-arg=-Wl,-z,max-page-size=16384"]
