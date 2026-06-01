@@ -64,7 +64,7 @@ impl Florestad {
         let node_config: floresta_node::Config = config.into();
         let network = node_config.network;
         let log_guard = floresta_node::init_logging(
-            &node_config.data_dir,
+            &node_config.datadir.to_string_lossy(),
             node_config.log_to_file,
             node_config.log_to_stdout,
             node_config.debug,
