@@ -1,0 +1,8 @@
+[bindings.kotlin]
+# Emit bindings directly in the Android app's package so no post-processing
+# `sed` is needed, and load `libflorestad_ffi.so` directly (no rename).
+package_name = "com.florestad"
+cdylib_name = "florestad_ffi"
+
+[bindings.python]
+cdylib_name = "florestad_ffi"

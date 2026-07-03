@@ -1,11 +1,144 @@
+/// The Bitcoin network to run on.
 enum Network {
+    /// Bitcoin mainnet.
     "Bitcoin",
+
+    /// Bitcoin signet.
     "Signet",
+
+    /// Bitcoin testnet.
     "Testnet",
+
+    /// Bitcoin regtest.
     "Regtest",
+
+    /// Bitcoin testnet4.
     "Testnet4"
 };
 
+/// Configures the assume-valid behavior for script validation.
+[Enum]
+interface AssumeValidArg {
+    /// Validate all scripts from genesis.
+    Disabled();
+
+    /// Use the hard-coded block hash provided by Floresta.
+    Hardcoded();
+
+    /// Provide your own block hash. The hash must be a 64-character hex string.
+    UserInput(string block_hash);
+};
+
+/// A pre-computed Utreexo accumulator state, used to skip initial block download.
+dictionary AssumeUtreexoValue {
+    /// The block hash at which this accumulator state is valid.
+    string block_hash;
+
+    /// The block height at which this accumulator state is valid.
+    u32 height;
+
+    /// The Utreexo accumulator roots at this block, as hex strings.
+    sequence<string> roots;
+
+    /// The number of leaves in the Utreexo accumulator at this block.
+    u64 leaves;
+};
+
+/// Configuration for the Floresta daemon.
+///
+/// All fields are optional except `datadir`, `network`, and `assume_valid`.
+dictionary Config {
+    /// Path to the data directory where chain and wallet data will be stored.
+    string datadir;
+
+    /// The Bitcoin network to run on.
+    Network network;
+
+    /// Disable DNS seed nodes for peer discovery.
+    boolean disable_dns_seeds = false;
+
+    /// Configures which blocks are assumed to have valid scripts.
+    AssumeValidArg assume_valid;
+
+    /// List of SLIP-132-encoded extended public keys to watch.
+    sequence<string>? wallet_xpub = null;
+
+    /// List of output descriptors to watch.
+    sequence<string>? wallet_descriptor = null;
+
+    /// Path to a TOML configuration file for additional settings.
+    string? config_file = null;
+
+    /// SOCKS5 proxy address for all outgoing connections except DNS seeds.
+    string? proxy = null;
+
+    /// Whether to build and store compact block filters for wallet rescanning.
+    boolean cfilters = false;
+
+    /// The block height to start downloading compact filters from.
+    i32? filters_start_height = null;
+
+    /// Address for the ZMQ server to listen on (requires zmq-server feature).
+    string? zmq_address = null;
+
+    /// Nodes to connect to exclusively. If non-empty, DNS seeds are ignored.
+    sequence<string> connect = [];
+
+    /// Address for the JSON-RPC server to listen on (requires json-rpc feature).
+    string? json_rpc_address = null;
+
+    /// Whether to write logs to stdout.
+    boolean log_to_stdout = false;
+
+    /// Whether to write logs to a file in the data directory.
+    boolean log_to_file = false;
+
+    /// Enable assume-utreexo mode.
+    boolean assume_utreexo = false;
+
+    /// Enable debug logging to the console.
+    boolean debug = false;
+
+    /// The user agent string advertised to peers.
+    string user_agent = "";
+
+    /// A custom Utreexo accumulator state to use instead of Floresta's hard-coded
+    /// values. Only used when `assume_utreexo` is enabled.
+    AssumeUtreexoValue? assumeutreexo_value = null;
+
+    /// Address for the Electrum server to listen on.
+    string? electrum_address = null;
+
+    /// Whether to enable the Electrum TLS server.
+    boolean enable_electrum_tls = false;
+
+    /// Address for the Electrum TLS server to listen on.
+    string? electrum_address_tls = null;
+
+    /// Path to the TLS private key file (PKCS#8-encoded).
+    string? tls_key_path = null;
+
+    /// Path to the TLS certificate file.
+    string? tls_cert_path = null;
+
+    /// Whether to generate a self-signed certificate for TLS.
+    boolean generate_cert = false;
+
+    /// Whether to allow fallback to v1 transport if v2 connection fails.
+    boolean allow_v1_fallback = false;
+
+    /// Whether to backfill skipped blocks when using assume-utreexo or fraud proofs.
+    boolean backfill = false;
+};
+
+/// Error returned by the Floresta FFI layer.
+[Error]
+interface FlorestaFfiError {
+    /// The daemon failed to start.
+    StartError(string details);
+};
+
+/// Raised by `dump_utreexo_state` when the accumulator cannot be exported yet.
 [Error]
 enum UtreexoExportError {
     "NotStarted",
@@ -13,6 +146,7 @@ enum UtreexoExportError {
     "Internal"
 };
 
+/// Raised by `validate_utreexo_snapshot_json` when a snapshot payload is invalid.
 [Error]
 enum UtreexoImportError {
     "InvalidJson",
@@ -22,51 +156,31 @@ enum UtreexoImportError {
     "NetworkMismatch"
 };
 
-dictionary Config {
-    string? data_dir = null;
-    string? electrum_address = null;
-    string? rpc_address = null;
-    Network network = "Bitcoin";
-    string? wallet_xpub = null;
-    string? wallet_descriptor = null;
-
-    i32? filters_start_height = null;
-    boolean assume_utreexo = false;
-
-    // User-agent advertised in the P2P version handshake. When None or empty
-    // the daemon falls back to floresta-node's default (empty string).
-    string? user_agent = null;
-
-    // JSON payload produced by `Florestad.dump_utreexo_state()` on a synced
-    // node. When present, the daemon uses it instead of the hardcoded
-    // assume-utreexo checkpoint, skipping IBD from the snapshot's height.
-    // Validated and applied at daemon construction; invalid JSON causes
-    // the `from_config` constructor to panic (matches existing unwrap
-    // pattern — callers should pre-validate with
-    // `validate_utreexo_snapshot_json`).
-    string? user_utreexo_snapshot_json = null;
-};
-
+/// A Floresta Bitcoin node instance.
 interface Florestad {
+    /// Create a new Floresta node with default configuration.
     constructor();
 
+    /// Create a new Floresta node with the given configuration.
     [Name=from_config]
     constructor(Config conf);
 
+    /// Start the node. Begins syncing, serving Electrum/JSON-RPC, and watching wallets.
+    [Throws=FlorestaFfiError]
     void start();
+
+    /// Gracefully stop the node, flushing data to disk. Always call before exit.
     void stop();
 
-    // Export the current Utreexo accumulator as a JSON string suitable for
-    // transfer to another device (clipboard, QR, share sheet). Returns an
-    // error if the node has not started or is still in IBD.
+    /// Export the current Utreexo accumulator as a portable JSON snapshot.
+    /// Returns an error if the node has not started or is still in IBD.
     [Throws=UtreexoExportError]
     string dump_utreexo_state();
 };
 
 namespace floresta {
-    // Verify that a payload (produced by `dump_utreexo_state`) parses
-    // cleanly and matches the expected network. Use this before triggering
-    // a daemon restart with the payload plugged into `Config`.
+    /// Verify a payload produced by `dump_utreexo_state` parses cleanly and
+    /// matches the expected network, before triggering a restart-to-import.
     [Throws=UtreexoImportError]
     void validate_utreexo_snapshot_json(string payload, Network expected_network);
 };
