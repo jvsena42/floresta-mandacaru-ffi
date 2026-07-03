@@ -1,6 +1,9 @@
 uniffi::include_scaffolding!("floresta");
 
-use bitcoin::Network;
+use std::path::PathBuf;
+use std::str::FromStr;
+
+use bitcoin::hashes::Hash;
 
 /// Default data directory when the caller does not supply one.
 ///
@@ -8,32 +11,105 @@ use bitcoin::Network;
 /// data directory on the installed device.
 const DEFAULT_DATA_DIR: &str = "/data/data/com.github.jvsena42.mandacaru/files";
 
-/// The FFI representation of the florestad service
+#[derive(Debug, Clone)]
+/// The Bitcoin network to run on.
+pub enum Network {
+    /// Bitcoin mainnet.
+    Bitcoin,
+    /// Bitcoin signet.
+    Signet,
+    /// Bitcoin testnet.
+    Testnet,
+    /// Bitcoin regtest.
+    Regtest,
+    /// Bitcoin testnet4.
+    Testnet4,
+}
+
+impl From<Network> for bitcoin::Network {
+    fn from(network: Network) -> bitcoin::Network {
+        match network {
+            Network::Bitcoin => bitcoin::Network::Bitcoin,
+            Network::Signet => bitcoin::Network::Signet,
+            Network::Testnet => bitcoin::Network::Testnet,
+            Network::Regtest => bitcoin::Network::Regtest,
+            Network::Testnet4 => bitcoin::Network::Testnet4,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+/// Configures the assume-valid behavior for script validation.
+pub enum AssumeValidArg {
+    /// Validate all scripts from genesis.
+    Disabled,
+
+    /// Use Floresta's hard-coded block hash.
+    Hardcoded,
+
+    /// Use a user-provided block hash (64-character hex string).
+    UserInput { block_hash: String },
+}
+
+#[derive(Debug, Clone)]
+/// A pre-computed Utreexo accumulator state.
+pub struct AssumeUtreexoValue {
+    /// The block hash at which this accumulator state is valid.
+    pub block_hash: String,
+
+    /// The block height at which this accumulator state is valid.
+    pub height: u32,
+
+    /// The Utreexo accumulator roots at this block, as hex strings.
+    pub roots: Vec<String>,
+
+    /// The number of leaves in the Utreexo accumulator at this block.
+    pub leaves: u64,
+}
+
+#[derive(Debug)]
+/// Error returned by the Floresta FFI layer.
+pub enum FlorestaFfiError {
+    /// The daemon failed to start, with an error message.
+    StartError { details: String },
+}
+
+impl std::fmt::Display for FlorestaFfiError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::StartError { details } => write!(f, "{details}"),
+        }
+    }
+}
+
+impl std::error::Error for FlorestaFfiError {}
+
+/// A Floresta Bitcoin node instance.
 ///
-/// This struct holds florestad and a runtime that will be used to run the service. It is the
-/// public interface to the service, and it should be used to interact with it.
+/// Wraps the Floresta daemon and a Tokio runtime. Create with [`Florestad::new`]
+/// for defaults or [`Florestad::from_config`] for custom settings. Call
+/// [`Florestad::start`] to begin syncing and [`Florestad::stop`] before exit.
 pub struct Florestad {
     rt: tokio::runtime::Runtime,
     florestad: floresta_node::Florestad,
     /// The network this daemon was constructed for. Stamped into
     /// `dump_utreexo_state` JSON payloads so the receiver can refuse cross-network
     /// imports.
-    network: Network,
+    network: bitcoin::Network,
     _log_guard: Option<floresta_node::WorkerGuard>,
 }
 
 impl Florestad {
-    /// Create a new instance of florestad
+    /// Create a new Floresta node with default configuration.
     ///
-    /// This will create a new instance of florestad, but it won't start it. You need to call
-    /// `start` to start the service. We'll use the default configuration for the service.
+    /// Uses Bitcoin mainnet and the Android per-package data directory.
     pub fn new() -> Florestad {
         let rt = tokio::runtime::Builder::new_multi_thread()
             .enable_all()
             .worker_threads(4)
             .thread_name("florestad")
             .build()
-            .unwrap();
+            .expect("failed to create tokio runtime");
 
         let data_dir = String::from(DEFAULT_DATA_DIR);
         let log_guard = floresta_node::init_logging(&data_dir, true, false, false)
@@ -41,25 +117,22 @@ impl Florestad {
             .flatten();
         let network = bitcoin::Network::Bitcoin;
         let florestad = floresta_node::Florestad::new(network, data_dir);
-        Self { rt, florestad, network, _log_guard: log_guard }
+        Self {
+            rt,
+            florestad,
+            network,
+            _log_guard: log_guard,
+        }
     }
 
-    /// Create a new instance of florestad from a configuration
-    ///
-    /// This will create a new instance of florestad, but it won't start it. You need to call
-    /// `start` to start the service. We'll use the configuration provided to start the service.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `config.user_utreexo_snapshot_json` is set but malformed or on the wrong network.
-    /// Callers should validate the payload first with [`validate_utreexo_snapshot_json`].
+    /// Create a new Floresta node with the given configuration.
     pub fn from_config(config: Config) -> Florestad {
         let rt = tokio::runtime::Builder::new_multi_thread()
             .enable_all()
             .worker_threads(4)
             .thread_name("florestad")
             .build()
-            .unwrap();
+            .expect("failed to create tokio runtime");
 
         let node_config: floresta_node::Config = config.into();
         let network = node_config.network;
@@ -71,14 +144,12 @@ impl Florestad {
         )
         .ok()
         .flatten();
-        // Anything logged before `init_logging` returns is dropped because the
-        // tracing subscriber isn't installed yet. Emit the snapshot summary
-        // here, once the subscriber is live, by inspecting the already-converted
-        // node_config instead.
+        // Emit the snapshot summary here, once the subscriber is live, by
+        // inspecting the already-converted node_config.
         match &node_config.assumeutreexo_value {
             Some(av) => tracing::info!(
                 target: "floresta_ffi",
-                "applying user_utreexo_snapshot_json: height={} leaves={} roots={} block_hash={}",
+                "applying assumeutreexo_value: height={} leaves={} roots={} block_hash={}",
                 av.height,
                 av.leaves,
                 av.roots.len(),
@@ -86,38 +157,42 @@ impl Florestad {
             ),
             None => tracing::info!(
                 target: "floresta_ffi",
-                "no user_utreexo_snapshot_json; fastSync flag assume_utreexo={}",
+                "no assumeutreexo_value; assume_utreexo={}",
                 node_config.assume_utreexo,
             ),
         }
         let florestad = floresta_node::Florestad::from_config(node_config);
-        Self { rt, florestad, network, _log_guard: log_guard }
+        Self {
+            rt,
+            florestad,
+            network,
+            _log_guard: log_guard,
+        }
     }
 
-    /// Gracefully stop the service
+    /// Start the node.
     ///
-    /// This method should be called before your application exits. It will stop the service
-    /// gracefully, waiting for all pending requests to finish. If you don't call this method, you
-    /// may corrupt the data and lose data.
+    /// Begins syncing the blockchain, serving the Electrum and JSON-RPC
+    /// interfaces, and watching configured wallets. Returns an error if
+    /// initialization fails.
+    pub fn start(&self) -> Result<(), FlorestaFfiError> {
+        self.rt.block_on(async {
+            self.florestad
+                .start()
+                .await
+                .map_err(|e| FlorestaFfiError::StartError {
+                    details: e.to_string(),
+                })
+        })
+    }
+
+    /// Gracefully stop the node.
     ///
-    /// This is equivalent to calling the `stop` rpc method.
+    /// Waits for all pending operations to finish and flushes data to disk.
+    /// Always call this before exiting to avoid data corruption.
     pub fn stop(&self) {
         self.rt.block_on(async {
             self.florestad.stop().await;
-        });
-    }
-
-    /// Start the service
-    ///
-    /// This method will start the service. It will block the current thread until the service is
-    /// fully started. It should not take long, but you may prefer calling it outside of the main
-    /// thread.
-    ///
-    /// After this function returns, the service is ready to accept requests. Floresta will start
-    /// running on the background and do all the heavy lifting for you.
-    pub fn start(&self) {
-        self.rt.block_on(async {
-            self.florestad.start().await.expect("Failed to start florestad");
         });
     }
 
@@ -129,93 +204,172 @@ impl Florestad {
     /// [`UtreexoExportError::NotStarted`] if the daemon has not been started
     /// yet, [`UtreexoExportError::NotSynced`] while IBD is in progress.
     pub fn dump_utreexo_state(&self) -> Result<String, UtreexoExportError> {
-        let snapshot = self
-            .florestad
-            .dump_utreexo_state()
-            .map_err(|e| match e {
-                floresta_node::DumpError::NotStarted => UtreexoExportError::NotStarted,
-                floresta_node::DumpError::NotSynced => UtreexoExportError::NotSynced,
-                floresta_node::DumpError::Chain(_) => UtreexoExportError::Internal,
-            })?;
+        let snapshot = self.florestad.dump_utreexo_state().map_err(|e| match e {
+            floresta_node::DumpError::NotStarted => UtreexoExportError::NotStarted,
+            floresta_node::DumpError::NotSynced => UtreexoExportError::NotSynced,
+            floresta_node::DumpError::Chain(_) => UtreexoExportError::Internal,
+        })?;
         Ok(snapshot.to_json(self.network))
     }
 }
 
+impl Default for Florestad {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Configuration for the Floresta daemon.
 pub struct Config {
-    /// Where we should place our data
-    ///
-    /// This directory must be readable and writable by our proccess. We'll use this dir to store
-    /// both chain and wallet data, so this should be kept in a non-volatile medium. We are not
-    /// particurly aggressive in disk usage, so we don't need a fast disk to work.
-    ///
-    /// If not set, it defaults to $HOME/.floresta
-    pub data_dir: Option<String>,
+    /// Path to the data directory. Must be readable and writable.
+    pub datadir: String,
 
-    /// The address of the electrum server to listen on
-    pub electrum_address: Option<String>,
-
-    /// The address of the json rpc server to listen on
-    pub rpc_address: Option<String>,
-
-    /// The height of the first filter we should download
-    pub filters_start_height: Option<i32>,
-
-    /// The network we are running on
+    /// The Bitcoin network to run on.
     pub network: Network,
 
-    /// The wallet xpub to keep track of funds for
-    pub wallet_xpub: Option<String>,
+    /// Disable DNS seed nodes for peer discovery.
+    pub disable_dns_seeds: bool,
 
-    /// The wallet descriptor to keep track of funds for
-    pub wallet_descriptor: Option<String>,
+    /// Which blocks are assumed to have valid scripts.
+    pub assume_valid: AssumeValidArg,
 
-    /// Whether we should use assume utreexo
+    /// SLIP-132-encoded extended public keys to watch.
+    pub wallet_xpub: Option<Vec<String>>,
+
+    /// Output descriptors to watch.
+    pub wallet_descriptor: Option<Vec<String>>,
+
+    /// Path to a TOML configuration file.
+    pub config_file: Option<String>,
+
+    /// SOCKS5 proxy for outgoing connections.
+    pub proxy: Option<String>,
+
+    /// Whether to build compact block filters.
+    pub cfilters: bool,
+
+    /// Block height to start downloading compact filters from.
+    pub filters_start_height: Option<i32>,
+
+    /// ZMQ server address (requires zmq-server feature).
+    pub zmq_address: Option<String>,
+
+    /// Nodes to connect to exclusively.
+    pub connect: Vec<String>,
+
+    /// JSON-RPC server address (requires json-rpc feature).
+    pub json_rpc_address: Option<String>,
+
+    /// Whether to write logs to stdout.
+    pub log_to_stdout: bool,
+
+    /// Whether to write logs to a file.
+    pub log_to_file: bool,
+
+    /// Enable assume-utreexo mode.
     pub assume_utreexo: bool,
 
-    /// JSON payload produced by [`Florestad::dump_utreexo_state`] on another
-    /// synced node. When present, the daemon uses it instead of the hardcoded
-    /// assume-utreexo checkpoint. Validated at `From<Config>` time — a bad
-    /// payload will panic (callers should pre-check with
-    /// [`validate_utreexo_snapshot_json`]).
-    pub user_utreexo_snapshot_json: Option<String>,
+    /// Enable debug logging.
+    pub debug: bool,
 
-    /// User-agent advertised in the P2P version handshake. When `None` or
-    /// empty, falls back to `floresta_node::Config`'s default empty string.
-    pub user_agent: Option<String>,
+    /// User agent string advertised to peers.
+    pub user_agent: String,
+
+    /// Custom Utreexo accumulator state for assume-utreexo.
+    pub assumeutreexo_value: Option<AssumeUtreexoValue>,
+
+    /// Electrum server address.
+    pub electrum_address: Option<String>,
+
+    /// Whether to enable the Electrum TLS server.
+    pub enable_electrum_tls: bool,
+
+    /// Electrum TLS server address.
+    pub electrum_address_tls: Option<String>,
+
+    /// Path to the TLS private key file.
+    pub tls_key_path: Option<String>,
+
+    /// Path to the TLS certificate file.
+    pub tls_cert_path: Option<String>,
+
+    /// Whether to generate a self-signed TLS certificate.
+    pub generate_cert: bool,
+
+    /// Whether to allow v1 transport fallback.
+    pub allow_v1_fallback: bool,
+
+    /// Whether to backfill skipped blocks.
+    pub backfill: bool,
 }
 
 impl From<Config> for floresta_node::Config {
     fn from(config: Config) -> floresta_node::Config {
-        let data_dir = config
-            .data_dir
-            .unwrap_or_else(|| String::from(DEFAULT_DATA_DIR));
+        let mut cfg =
+            floresta_node::Config::new(config.network.into(), PathBuf::from(&config.datadir));
 
-        let mut node_config = floresta_node::Config::new(config.network, data_dir);
-        node_config.electrum_address = config.electrum_address;
-        node_config.json_rpc_address = config.rpc_address;
-        node_config.filters_start_height = config.filters_start_height;
-        node_config.log_to_file = true;
-        node_config.log_to_stdout = false;
-        node_config.assume_utreexo = config.assume_utreexo;
-        node_config.wallet_descriptor = config.wallet_descriptor.map(|desc| vec![desc]);
-        node_config.cfilters = true;
+        cfg.disable_dns_seeds = config.disable_dns_seeds;
+        cfg.wallet_xpub = config.wallet_xpub;
+        cfg.wallet_descriptor = config.wallet_descriptor;
+        cfg.config_file = config.config_file.map(PathBuf::from);
+        cfg.proxy = config.proxy;
+        cfg.cfilters = config.cfilters;
+        cfg.filters_start_height = config.filters_start_height;
+        // The mandacaru node's `connect` is a single optional address, not a
+        // list; take the first entry if the caller supplied any.
+        cfg.connect = config.connect.into_iter().next();
+        cfg.json_rpc_address = config.json_rpc_address;
 
-        if let Some(ua) = config.user_agent.filter(|s| !s.is_empty()) {
-            node_config.user_agent = ua;
+        #[cfg(feature = "zmq-server")]
+        {
+            cfg.zmq_address = config.zmq_address;
         }
 
-        if let Some(payload) = config.user_utreexo_snapshot_json {
-            let snap = floresta_node::UtreexoSnapshot::from_json(&payload)
-                .expect("user_utreexo_snapshot_json failed to parse — validate it first");
-            if snap.1 != config.network {
-                panic!(
-                    "user_utreexo_snapshot_json is for a different network than Config.network"
-                );
+        cfg.log_to_stdout = config.log_to_stdout;
+        cfg.log_to_file = config.log_to_file;
+        cfg.assume_utreexo = config.assume_utreexo;
+        cfg.debug = config.debug;
+        cfg.user_agent = config.user_agent;
+        cfg.electrum_address = config.electrum_address;
+        cfg.enable_electrum_tls = config.enable_electrum_tls;
+        cfg.electrum_address_tls = config.electrum_address_tls;
+        cfg.tls_key_path = config.tls_key_path.map(PathBuf::from);
+        cfg.tls_cert_path = config.tls_cert_path.map(PathBuf::from);
+        cfg.generate_cert = config.generate_cert;
+        cfg.allow_v1_fallback = config.allow_v1_fallback;
+        cfg.backfill = config.backfill;
+
+        cfg.assume_valid = match config.assume_valid {
+            AssumeValidArg::Disabled => floresta_node::AssumeValidArg::Disabled,
+            AssumeValidArg::Hardcoded => floresta_node::AssumeValidArg::Hardcoded,
+            AssumeValidArg::UserInput { block_hash } => {
+                let hash = bitcoin::BlockHash::from_str(&block_hash)
+                    .unwrap_or_else(|_| bitcoin::BlockHash::all_zeros());
+                floresta_node::AssumeValidArg::UserInput(hash)
             }
-            node_config.assumeutreexo_value = Some(snap.0.into_assume_value());
-        }
+        };
 
-        node_config
+        cfg.assumeutreexo_value = config.assumeutreexo_value.and_then(|v| {
+            let hash = bitcoin::BlockHash::from_str(&v.block_hash)
+                .ok()
+                .unwrap_or_else(bitcoin::BlockHash::all_zeros);
+            let roots: Vec<rustreexo::node_hash::BitcoinNodeHash> = v
+                .roots
+                .iter()
+                .filter_map(|r| rustreexo::node_hash::BitcoinNodeHash::from_str(r).ok())
+                .collect();
+            if roots.len() != v.roots.len() {
+                return None;
+            }
+            Some(floresta_node::AssumeUtreexoValue {
+                block_hash: hash,
+                height: v.height,
+                roots,
+                leaves: v.leaves,
+            })
+        });
+
+        cfg
     }
 }
 
@@ -223,25 +377,22 @@ impl From<Config> for floresta_node::Config {
 /// [`Florestad::dump_utreexo_state`] and is for `expected_network`.
 ///
 /// Use this before triggering a restart-to-import on the Android side so a
-/// bad QR / paste does not reach [`Florestad::from_config`] (which panics).
+/// bad QR / paste does not reach [`Florestad::from_config`].
 pub fn validate_utreexo_snapshot_json(
     payload: String,
     expected_network: Network,
 ) -> Result<(), UtreexoImportError> {
+    let expected: bitcoin::Network = expected_network.into();
     let (_, got) =
         floresta_node::UtreexoSnapshot::from_json(&payload).map_err(map_snapshot_error)?;
-    if got != expected_network {
+    if got != expected {
         return Err(UtreexoImportError::NetworkMismatch);
     }
     Ok(())
 }
 
 // ---------------------------------------------------------------------------
-// Error types surfaced through UniFFI.
-//
-// UniFFI 0.26 requires error types to implement `std::fmt::Display` and
-// `std::error::Error`. Keep these as simple unit variants — the UDL mirrors
-// them verbatim.
+// Utreexo snapshot error types surfaced through UniFFI.
 // ---------------------------------------------------------------------------
 
 #[derive(Debug)]
@@ -293,7 +444,9 @@ impl std::error::Error for UtreexoImportError {}
 fn map_snapshot_error(e: floresta_node::SnapshotError) -> UtreexoImportError {
     match e {
         floresta_node::SnapshotError::InvalidJson(_) => UtreexoImportError::InvalidJson,
-        floresta_node::SnapshotError::UnsupportedVersion(_) => UtreexoImportError::UnsupportedVersion,
+        floresta_node::SnapshotError::UnsupportedVersion(_) => {
+            UtreexoImportError::UnsupportedVersion
+        }
         floresta_node::SnapshotError::UnknownNetwork(_) => UtreexoImportError::UnknownNetwork,
         floresta_node::SnapshotError::InvalidHex(_) => UtreexoImportError::InvalidHex,
         floresta_node::SnapshotError::NetworkMismatch { .. } => UtreexoImportError::NetworkMismatch,
