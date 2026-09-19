@@ -315,9 +315,7 @@ impl From<Config> for floresta_node::Config {
         cfg.proxy = config.proxy;
         cfg.cfilters = config.cfilters;
         cfg.filters_start_height = config.filters_start_height;
-        // The mandacaru node's `connect` is a single optional address, not a
-        // list; take the first entry if the caller supplied any.
-        cfg.connect = config.connect.into_iter().next();
+        cfg.connect = config.connect;
         cfg.json_rpc_address = config.json_rpc_address;
 
         #[cfg(feature = "zmq-server")]
