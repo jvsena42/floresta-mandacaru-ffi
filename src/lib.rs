@@ -245,10 +245,12 @@ pub struct Config {
     /// SOCKS5 proxy for outgoing connections.
     pub proxy: Option<String>,
 
-    /// Whether to build compact block filters.
+    /// Whether to keep the compact block filter header chain for wallet rescanning.
+    /// Only headers are stored; full filters are downloaded on demand by each rescan.
     pub cfilters: bool,
 
-    /// Block height to start downloading compact filters from.
+    /// Wallet birthday: the height rescans start from unless the caller names one.
+    /// Negative values are relative to the tip at the time of the rescan.
     pub filters_start_height: Option<i32>,
 
     /// ZMQ server address (requires zmq-server feature).
