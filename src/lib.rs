@@ -138,7 +138,7 @@ impl Florestad {
         let network = node_config.network;
         let log_guard = floresta_node::init_logging(
             &node_config.datadir.to_string_lossy(),
-            node_config.log_to_file,
+            node_config.log_file.is_some(),
             node_config.log_to_stdout,
             node_config.debug,
         )
@@ -193,6 +193,13 @@ impl Florestad {
     pub fn stop(&self) {
         self.rt.block_on(async {
             self.florestad.stop().await;
+            // Like the florestad binary: wait for the node to wind down, which also removes the
+            // RPC cookie. Bounded to 5 s so the app's onDestroy stays well clear of an ANR.
+            let _ = tokio::time::timeout(
+                std::time::Duration::from_secs(5),
+                self.florestad.wait_shutdown(),
+            )
+            .await;
         });
     }
 
@@ -326,7 +333,10 @@ impl From<Config> for floresta_node::Config {
         }
 
         cfg.log_to_stdout = config.log_to_stdout;
-        cfg.log_to_file = config.log_to_file;
+        // The node only reports this path (getrpcinfo); `init_logging` writes debug.log there.
+        cfg.log_file = config
+            .log_to_file
+            .then(|| PathBuf::from(&config.datadir).join("debug.log"));
         cfg.assume_utreexo = config.assume_utreexo;
         cfg.debug = config.debug;
         cfg.user_agent = config.user_agent;
