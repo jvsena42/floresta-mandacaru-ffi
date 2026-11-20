@@ -249,8 +249,11 @@ pub struct Config {
     /// Path to a TOML configuration file.
     pub config_file: Option<String>,
 
-    /// SOCKS5 proxy for outgoing connections.
+    /// SOCKS5 proxy for every outgoing peer connection; DNS seeds are queried over it too.
     pub proxy: Option<String>,
+
+    /// SOCKS5 proxy used only for Tor onion peers.
+    pub onion_proxy: Option<String>,
 
     /// Whether to keep the compact block filter header chain for wallet rescanning.
     /// Only headers are stored; full filters are downloaded on demand by each rescan.
@@ -322,6 +325,7 @@ impl From<Config> for floresta_node::Config {
         cfg.wallet_descriptor = config.wallet_descriptor;
         cfg.config_file = config.config_file.map(PathBuf::from);
         cfg.proxy = config.proxy;
+        cfg.onion_proxy = config.onion_proxy;
         cfg.cfilters = config.cfilters;
         cfg.filters_start_height = config.filters_start_height;
         cfg.connect = config.connect;
