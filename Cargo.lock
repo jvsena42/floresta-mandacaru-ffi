@@ -829,7 +829,7 @@ checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 [[package]]
 name = "floresta-chain"
 version = "0.5.1"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Fassume-utreexo-lost-on-early-header-end#5c2ca536c48529517960b44a763bf9cdbbf4673c"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#f080bee4df8472d226f7ae8acd2409764fee146b"
 dependencies = [
  "bitcoin",
  "bitcoin_hashes 1.1.0",
@@ -848,7 +848,7 @@ dependencies = [
 [[package]]
 name = "floresta-common"
 version = "1.0.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Fassume-utreexo-lost-on-early-header-end#5c2ca536c48529517960b44a763bf9cdbbf4673c"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#f080bee4df8472d226f7ae8acd2409764fee146b"
 dependencies = [
  "bitcoin",
  "hashbrown 0.17.1",
@@ -858,7 +858,7 @@ dependencies = [
 [[package]]
 name = "floresta-compact-filters"
 version = "0.5.1"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Fassume-utreexo-lost-on-early-header-end#5c2ca536c48529517960b44a763bf9cdbbf4673c"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#f080bee4df8472d226f7ae8acd2409764fee146b"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -870,7 +870,7 @@ dependencies = [
 [[package]]
 name = "floresta-domain"
 version = "0.1.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Fassume-utreexo-lost-on-early-header-end#5c2ca536c48529517960b44a763bf9cdbbf4673c"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#f080bee4df8472d226f7ae8acd2409764fee146b"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -879,7 +879,7 @@ dependencies = [
 [[package]]
 name = "floresta-electrum"
 version = "0.5.1"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Fassume-utreexo-lost-on-early-header-end#5c2ca536c48529517960b44a763bf9cdbbf4673c"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#f080bee4df8472d226f7ae8acd2409764fee146b"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -912,7 +912,7 @@ dependencies = [
 [[package]]
 name = "floresta-mempool"
 version = "0.5.1"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Fassume-utreexo-lost-on-early-header-end#5c2ca536c48529517960b44a763bf9cdbbf4673c"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#f080bee4df8472d226f7ae8acd2409764fee146b"
 dependencies = [
  "ahash",
  "bitcoin",
@@ -926,7 +926,7 @@ dependencies = [
 [[package]]
 name = "floresta-node"
 version = "0.9.1"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Fassume-utreexo-lost-on-early-header-end#5c2ca536c48529517960b44a763bf9cdbbf4673c"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#f080bee4df8472d226f7ae8acd2409764fee146b"
 dependencies = [
  "axum",
  "base64 0.22.1",
@@ -961,7 +961,7 @@ dependencies = [
 [[package]]
 name = "floresta-proc-macro"
 version = "0.1.0"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Fassume-utreexo-lost-on-early-header-end#5c2ca536c48529517960b44a763bf9cdbbf4673c"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#f080bee4df8472d226f7ae8acd2409764fee146b"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -971,7 +971,7 @@ dependencies = [
 [[package]]
 name = "floresta-rpc"
 version = "0.5.1"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Fassume-utreexo-lost-on-early-header-end#5c2ca536c48529517960b44a763bf9cdbbf4673c"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#f080bee4df8472d226f7ae8acd2409764fee146b"
 dependencies = [
  "bitcoin",
  "corepc-types",
@@ -985,7 +985,7 @@ dependencies = [
 [[package]]
 name = "floresta-watch-only"
 version = "0.5.1"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Fassume-utreexo-lost-on-early-header-end#5c2ca536c48529517960b44a763bf9cdbbf4673c"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#f080bee4df8472d226f7ae8acd2409764fee146b"
 dependencies = [
  "bitcoin",
  "floresta-chain",
@@ -1001,7 +1001,7 @@ dependencies = [
 [[package]]
 name = "floresta-wire"
 version = "0.5.1"
-source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=fix%2Fassume-utreexo-lost-on-early-header-end#5c2ca536c48529517960b44a763bf9cdbbf4673c"
+source = "git+https://github.com/jvsena42/Floresta-mandacaru?branch=master#f080bee4df8472d226f7ae8acd2409764fee146b"
 dependencies = [
  "bip324",
  "bitcoin",
