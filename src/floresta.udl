@@ -69,8 +69,13 @@ dictionary Config {
     /// Path to a TOML configuration file for additional settings.
     string? config_file = null;
 
-    /// SOCKS5 proxy address for all outgoing connections except DNS seeds.
+    /// SOCKS5 proxy for every outgoing peer connection; DNS seeds are queried over it too.
     string? proxy = null;
+
+    /// SOCKS5 proxy used only for Tor onion peers. Other peers follow `proxy`, or connect
+    /// directly when it is unset, so onion peers can be reached without routing clearnet
+    /// traffic through Tor.
+    string? onion_proxy = null;
 
     /// Whether to keep the compact block filter header chain for wallet rescanning.
     /// Only headers are stored; full filters are downloaded on demand by each rescan.
